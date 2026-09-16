@@ -96,6 +96,8 @@ Each script prints its results and saves its figures in `figures/`.
 
 With constant k (2.3 W/m/K) the centre temperature is 860.8696 K, the same as the parabola, and the difference is below 1e-9 K on 10, 100 and 400 nodes. That isn't the method being extremely accurate. A central difference is exact on a parabola, so there's no discretisation error left, only rounding. It shows the system is assembled correctly, but it says nothing about how the error shrinks with the grid.
 
+![Constant k, numerical and exact profile](figures/constant_k_profile.png)
+
 ![Constant k, difference from the exact solution](figures/constant_k_error.png)
 
 That was exactly my problem when I wanted to measure the convergence: the obvious test case has zero error at every grid size, so there's nothing to measure. The variable-k case fixes that, because the scheme is no longer exact there but the Kirchhoff solution still is. I measure the error on the Kirchhoff variable, as a relative error, and refine the grid:
@@ -140,3 +142,5 @@ If I come back to this, I'll fix Thomas and the `n_nodes` mismatch first, since 
 ## Author
 
 Fabio Mitrea, third-year Energy Engineering student at Sapienza University of Rome.
+
+The code is released under the MIT License, see `LICENSE`.
