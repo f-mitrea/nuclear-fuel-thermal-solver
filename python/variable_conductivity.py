@@ -72,7 +72,6 @@ def solve_pellet_newton(
     n_iter = 0
     err = 1.0
     T_new = T_old
-    # storia = []
 
     while np.max(np.abs(err)) > tol and n_iter < max_iter:
         J = assemble_pellet_jacobian(T_old, radius, dr, k_UO2, dk_dT, d2k_dT2)
@@ -89,7 +88,7 @@ def solve_pellet_newton(
     if final_err > tol:
         raise RuntimeError(
             f"Newton did not converge: {n_iter} iterations, "
-            f"last increment {final_err:.3e}, tolerance{tol:.3e}"
+            f"last increment {final_err:.3e}, tolerance {tol:.3e}"
         )
 
     return T_new
@@ -175,8 +174,8 @@ def convergence_study(k_expr, T_wall, q_vol, R_pellet, tol, max_iter, node_count
 
 def main(
     k_expr=K_DEFAULT,
-    T_wall=600.0,
-    q_vol=150.0e6,
+    T_wall=800.0,
+    q_vol=400.0e6,
     R_pellet=4.0e-3,
     n_nodes=100,
     tol=1.0e-8,

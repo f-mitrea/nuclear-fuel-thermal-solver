@@ -11,8 +11,8 @@ from variable_conductivity import (
     solve_variable_conductivity,
 )
 
-T_WALL = 600.0
-Q_VOL = 150.0e6
+T_WALL = 800.0
+Q_VOL = 400.0e6
 R_PELLET = 4.0e-3
 TOL = 1.0e-8
 MAX_ITER = 20
@@ -32,8 +32,8 @@ def test_matches_kirchhoff_closed_form():
         sp.sympify(K_DEFAULT), T_WALL, Q_VOL, R_PELLET, 100, TOL, MAX_ITER
     )
 
-    assert T[0] == pytest.approx(707.2566, abs=1e-3)
-    assert np.max(np.abs(T - kirchhoff_exact(radius))) < 5e-3
+    assert T[0] == pytest.approx(1202.8913, abs=1e-3)
+    assert np.max(np.abs(T - kirchhoff_exact(radius))) < 2e-2
 
 
 def test_constant_k_gives_parabola():

@@ -33,7 +33,7 @@ def assemble_constant_conductivity_system(
 
 
 def solve_constant_conductivity(
-    k_UO2=2.3, T_wall=600, q_vol=150.0e6, R_pellet=4.0e-3, n_nodes=100
+    k_UO2=2.3, T_wall=800.0, q_vol=400.0e6, R_pellet=4.0e-3, n_nodes=100
 ):
 
     dr = R_pellet / n_nodes
@@ -62,7 +62,7 @@ def solve_constant_conductivity(
     return radius, T_num, T_exact
 
 
-def main(k_UO2=2.3, T_wall=600, q_vol=150.0e6, R_pellet=4.0e-3, n_nodes=100):
+def main(k_UO2=2.3, T_wall=800.0, q_vol=400.0e6, R_pellet=4.0e-3, n_nodes=100):
 
     radius, T_num, T_exact = solve_constant_conductivity(
         k_UO2, T_wall, q_vol, R_pellet, n_nodes

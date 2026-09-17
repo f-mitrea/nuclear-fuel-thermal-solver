@@ -1,6 +1,6 @@
 clc,clear,close all
 
-addpath('C:\Users\mfale\Desktop\nuclear-fuel-thermal-solver\matlab_prototype\common');
+addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'common'));
 
 k_UO2 = input('Enter the UO2 thermal conductivity [W/(m*K)]: ');
 if isempty(k_UO2)

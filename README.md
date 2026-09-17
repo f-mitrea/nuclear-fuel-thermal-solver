@@ -6,7 +6,7 @@ I built it between the end of August and mid-September 2026, in about three week
 
 The problem itself comes from a Fisica Tecnica (heat transfer) exercise: a fuel rod with the pellet, the cladding and the coolant around it. I kept only the pellet, since that's where the interesting part is: heat generated inside, and a conductivity that changes with temperature. I haven't taken the nuclear plants course yet (it's next semester), so everything here is built from heat transfer and numerical methods.
 
-I worked out all the maths on paper first. Then I wrote the solver in MATLAB, because that's what I'd used for the exam, and once it worked I ported it to Python. Before porting I spent some time reading up on NumPy and the other libraries, which I'd never used, and that made the port go smoothly. The Python code is the one I test and keep updated. The MATLAB files in `matlab_prototype/` are my original version, left as they were.
+I worked out all the maths on paper first. Then I wrote the solver in MATLAB, because that's what I'd used for the exam, and once it worked I ported it to Python. Before porting I spent some time reading up on NumPy and the other libraries, which I'd never used, and that made the port go smoothly. The Python code is the one I test and keep updated. The MATLAB files in `matlab_prototype/` are my original version. I only fixed two typos in the file names and replaced the hard-coded paths.
 
 ## The problem
 
@@ -32,7 +32,7 @@ T(r) = T_wall + q''' (R^2 - r^2) / (4k)
 k(T) = 1 / (0.0375 + 2.165e-4 T)      [W/m/K, T in K]
 ```
 
-which is the phonon term of the correlation recommended by Harding and Martin (J. Nucl. Mater. 166 (1989) 223-226). Their full formula has a second term that matters at high temperature, but in this pellet it's below 1e-6 W/m/K against a k of about 5, so I left it out.
+which is the phonon term of the correlation recommended by Harding and Martin (J. Nucl. Mater. 166 (1989) 223-226). Their full formula has a second term that matters at high temperature, but in this pellet it's at most about 0.004 W/m/K against a k of about 3.4, around 0.1%, so I left it out.
 
 With k(T) the equation is nonlinear, but it still has an exact solution. Using the Kirchhoff transform K(T) = integral of k dT, it becomes the linear one again, K(T) - K(T_wall) = q''' (R^2 - r^2)/4, and for this k(T) you can invert it by hand:
 
@@ -42,7 +42,7 @@ T(r) = [ (A + B T_wall) exp( B q''' (R^2 - r^2) / 4 ) - A ] / B      A = 0.0375,
 
 So in both cases I can compare the numerical solution with an exact one.
 
-The default values are R = 4 mm, q''' = 150 MW/m^3 and T_wall = 600 K.
+The default values are R = 4 mm, q''' = 400 MW/m^3 and T_wall = 800 K. That is a linear power of about 20 kW/m, a typical value for a light-water reactor fuel rod in normal operation.
 
 ## How the code works
 
@@ -94,7 +94,7 @@ python python\variable_conductivity.py
 
 Each script prints its results and saves its figures in `figures/`.
 
-With constant k (2.3 W/m/K) the centre temperature is 860.8696 K, the same as the parabola, and the difference is below 1e-9 K on 10, 100 and 400 nodes. That isn't the method being extremely accurate. A central difference is exact on a parabola, so there's no discretisation error left, only rounding. It shows the system is assembled correctly, but it says nothing about how the error shrinks with the grid.
+With constant k (2.3 W/m/K) the centre temperature is 1495.6522 K, the same as the parabola, and the difference is below 1e-9 K on 10, 100 and 400 nodes. That isn't the method being extremely accurate. A central difference is exact on a parabola, so there's no discretisation error left, only rounding. It shows the system is assembled correctly, but it says nothing about how the error shrinks with the grid.
 
 ![Constant k, numerical and exact profile](figures/constant_k_profile.png)
 
@@ -104,18 +104,18 @@ That was exactly my problem when I wanted to measure the convergence: the obviou
 
 ```
 nodes   dr [m]      rel. error   order
-  25    1.667e-04   1.734e-04
-  50    8.163e-05   4.163e-05    2.00
- 100    4.040e-05   1.020e-05    2.00
- 200    2.010e-05   2.525e-06    2.00
- 400    1.003e-05   6.281e-07    2.00
+  25    1.667e-04   4.773e-04
+  50    8.163e-05   1.146e-04    2.00
+ 100    4.040e-05   2.807e-05    2.00
+ 200    2.010e-05   6.949e-06    2.00
+ 400    1.003e-05   1.728e-06    2.00
 ```
 
 Each time dr halves, the error drops by four, which is what second order means. The "order" column is log(e1/e2) / log(dr1/dr2) between two consecutive grids.
 
 ![Convergence with variable k](figures/variable_k_convergence.png)
 
-The centre temperature with variable k is 707.2566 K. It's lower than with constant k because this law gives k between 5.2 and 6.0 W/m/K inside the pellet, more than twice the 2.3 I used in the first case.
+The centre temperature with variable k is 1202.8913 K. It's lower than with constant k because this law gives k between 3.4 and 4.7 W/m/K inside the pellet, well above the 2.3 I used in the first case.
 
 ![Temperature profile with variable k](figures/variable_k_profile.png)
 
@@ -131,11 +131,9 @@ The convergence error is measured on the Kirchhoff variable, not on T directly. 
 
 The plotting code sits in the same files as the solvers, so you can't use a solver without also importing matplotlib.
 
-The tests take 15 seconds, which is slow for 12 tests. I haven't looked into why yet.
+The test suite takes about 15 seconds on my laptop, but `pytest --durations=5` shows the tests themselves run in well under a second: nearly all of the time is spent importing SymPy and matplotlib. Moving the plots out of the solver files would take matplotlib out of the tests.
 
-The physics is very simplified: steady state only, uniform heat generation, no gap or cladding (the pellet surface temperature is simply given), and a k that doesn't depend on burnup or porosity. Harding and Martin also give their correlation for 773 to 3120 K, and my pellet is between 600 and 707 K, so I'm using it a bit below its range.
-
-The MATLAB prototype has a couple of typos in file and folder names (`costant`, `coductivity`) and hard-coded paths. I'm leaving it as it was on purpose.
+The physics is very simplified: steady state only, uniform heat generation, no gap or cladding (the pellet surface temperature is simply given), and a k that doesn't depend on burnup or porosity. Harding and Martin also give their correlation for 773 to 3120 K, and my pellet is between 800 and 1203 K, inside that range.
 
 If I come back to this, I'll fix Thomas and the `n_nodes` mismatch first, since they're small and the existing tests would catch any mistake. Then the residual check in Newton, and moving the plots into their own script. After that I'd like to put back the parts of the original exercise I dropped, the gap, the cladding and the coolant.
 

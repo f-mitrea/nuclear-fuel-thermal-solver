@@ -19,9 +19,6 @@ def solve_tridiagonal_system(A, B):
         alphas[j] = A[j, j - 1] / u[j - 1]
         u[j] = A[j, j] - alphas[j] * v[j - 1]
 
-    # L = np.eye(N) + np.diag(alphas[1:N], -1)
-    # U = np.diag[u] + np.diag(v[1:N-1], 1)
-
     X[0] = B[0]
 
     for k in range(1, N):
